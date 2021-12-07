@@ -1,0 +1,70 @@
+.playerBox {
+  position: relative;
+
+  width: 184px;
+  height: 240px;
+
+  background: #c4c4c4;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+}
+.playerBox > h3 {
+  margin-top: 14px;
+
+  width: 164px;
+  height: 30px;
+
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+}
+.playerBox > h2 {
+  margin-top: 10px;
+
+  width: 164px;
+  height: 30px;
+
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 30px;
+  color: #550000;
+}
+.profileImgBox {
+  margin-top: 18px;
+
+  width: 128px;
+  height: 128px;
+
+  background: #eeeeee;
+  border-radius: 50%;
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.25);
+}
+.profileImgBox > img {
+  margin: 14px;
+
+  width: 100px;
+  height: 100px;
+}
+.playerNone {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  background: #aaaaaa;
+  border-radius: 10px;
+}
+.playerExist {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius: 10px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
