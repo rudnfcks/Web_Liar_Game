@@ -66,25 +66,26 @@
   line-height: 28px;
 }
 
-#joinForm {
+.joinForm {
   width: 350px;
   height: 256px;
 }
-#joinForm > input {
-  margin-bottom: 108px;
+.joinForm > input {
+  margin: 0 25px 108px 25px;
 
-  width: 350px;
+  width: 300px;
   height: 64px;
 
   box-sizing: border-box;
   padding: 0 10px;
 
+  text-align: center;
   font-size: 32px;
   border: none;
   border-radius: 10px;
   box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
-#joinForm > button {
+.joinForm > button {
   width: 350px;
   height: 84px;
 
@@ -97,7 +98,7 @@
   background: #c4c4c4;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
-#joinForm > button:active {
+.joinForm > button:active {
   transform: translateY(4px);
 
   background: #aaaaaa;

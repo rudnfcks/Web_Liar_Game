@@ -5,11 +5,12 @@ function PlayerBox({ img, name, isReady }) {
 
   return (
     <div className={style.playerBox}>
-      {img != undefined ? (
+      {img !== undefined ? (
         <div className={style.playerExist}></div>
       ) : (
         <div className={style.playerNone}></div>
       )}
+
       <div className={style.profileImgBox}>
         <img src={`${dir}/svg/face_${img}.svg`} alt="face" />
       </div>

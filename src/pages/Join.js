@@ -1,22 +1,83 @@
+import { useEffect, useState } from "react";
+import { useHistory } from "react-router";
+
 import style from "./css/Join.module.css";
 
-function Join() {
+function Join({ socket }) {
   // 고정 변수
+  const history = useHistory();
   const dir = process.env.PUBLIC_URL;
 
+  // State 설정
+  const [profileImg, setProfileImg] = useState(0);
+  const [profileName, setProfileName] = useState("");
+
+  // Effect 설정
+  useEffect(() => {
+    socket.emit("disconnection");
+
+    socket.on("isFull", (isFull) => {
+      if (isFull) {
+        alert("방이 이미 가득 찼어요");
+      } else {
+        history.replace("/lobby");
+      }
+    });
+  }, [socket, history]);
+
+  // 함수 설정
+  // 이미지 변경 버튼 클릭 이벤트
+  const imgBtnOnClickHandler = () => {
+    setProfileImg((current) => (current + 1) % 11);
+  };
+  // 이름 입력칸 변경 이벤트
+  const nameInputOnChangeHandler = (event) => {
+    setProfileName(event.currentTarget.value);
+  };
+  // Join 버튼 클릭 이벤트
+  const joinPageOnSubmitHandler = (event) => {
+    event.preventDefault();
+
+    const reset = (alret) => {
+      alert(alret);
+      setProfileName("");
+    };
+
+    if (profileName.length > 5) {
+      reset("이름이 너무 길어요 ( 5글자 이하 )");
+      return;
+    }
+    if (!profileName.replace(/[ 　ㅤ]/g, "")) {
+      reset("이름을 입력해주세요 ( 공백 이름 불가 )");
+      return;
+    }
+
+    socket.emit("join", { profileImg, profileName });
+  };
+
+  // JSX
   return (
     <div id="wrap">
       <section className={style.profileBox}>
         <div className={style.profileImgBox}>
-          <img src={`${dir}/svg/face_0.svg`} alt="face" />
+          <img src={`${dir}/svg/face_${profileImg}.svg`} alt="face" />
 
-          <button className={style.profileImgChangeBtn}>
+          <button
+            className={style.profileImgChangeBtn}
+            onClick={imgBtnOnClickHandler}
+          >
             <img src={`${dir}/svg/return.svg`} alt="change" />
           </button>
         </div>
-        <form id={style.joinForm}>
-          <input type="text" />
-          <button>JOIN</button>
+        <form onSubmit={joinPageOnSubmitHandler}>
+          <div className={style.joinForm}>
+            <input
+              type="text"
+              value={profileName}
+              onChange={nameInputOnChangeHandler}
+            />
+            <button>JOIN</button>
+          </div>
         </form>
       </section>
 

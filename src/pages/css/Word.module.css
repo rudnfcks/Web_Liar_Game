@@ -1,0 +1,15 @@
+.contentBox > h1 {
+  color: #550000;
+}
+
+.wordBox {
+  margin-top: 20px;
+
+  width: 760px;
+  height: 500px;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-between;
+}

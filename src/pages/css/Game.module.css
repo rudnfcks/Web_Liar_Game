@@ -1,0 +1,79 @@
+.contentBox > h1 {
+  color: #550000;
+}
+
+.gameBox {
+  margin-top: 20px;
+
+  width: 760px;
+  height: 500px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  justify-content: space-between;
+}
+
+#gameForm {
+  margin-top: 20px;
+
+  width: 760px;
+  height: 144px;
+
+  box-sizing: border-box;
+  padding: 9px;
+
+  background: #aaaaaa;
+  border: 1px solid #333333;
+  border-radius: 10px;
+
+  display: flex;
+}
+#gameForm > div {
+  width: 650px;
+  height: 124px;
+}
+#gameForm h3 {
+  width: 650px;
+  height: 30px;
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+}
+#gameForm h3:nth-of-type(2) {
+  text-align: right;
+}
+#gameForm input {
+  margin: 8px 0;
+
+  width: 650px;
+  height: 48px;
+
+  box-sizing: border-box;
+  padding: 0px 10px;
+
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+#gameForm button {
+  margin-left: 12px;
+
+  width: 78px;
+  height: 124px;
+
+  background: #c4c4c4;
+  border: none;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #550000;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+#gameForm button:active {
+  transform: translateY(4px);
+
+  box-shadow: none;
+}
