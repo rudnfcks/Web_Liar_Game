@@ -4,6 +4,8 @@ import { useHistory } from "react-router";
 import ChatBox from "../components/ChatBox";
 import GameBox from "../components/GameBox";
 import PlayerPopup from "../components/PlayerPopup";
+import PassPopup from "../components/PassPopup";
+import EndingPopup from "../components/EndingPopup";
 
 import style from "./css/Game.module.css";
 import chatBoxstyle from "../components/css/ChatBox.module.css";
@@ -15,14 +17,20 @@ function Game({ socket }) {
   // State 설정
   const [myInfo, setMyInfo] = useState({});
   const [players, setPlayers] = useState([]);
+
   const [chatting, setChatting] = useState([]);
+
   const [word, setWord] = useState({});
   const [turn, setTurn] = useState(null);
+
   const [inputCommand, setInputCommand] = useState("");
+
   const [voteTime, setVoteTime] = useState(false);
   const [isVote, setIsVote] = useState(false);
   const [voteResult, setVoteResult] = useState(null);
-  const [voteResultTimer, setVoteResultTimer] = useState(3);
+
+  const [timer, setTimer] = useState(0);
+  const [isMafiaWin, setIsMafiaWin] = useState(false);
 
   // Effect 설정
   useEffect(() => {
@@ -37,7 +45,7 @@ function Game({ socket }) {
       setMyInfo(info);
     });
     // 모든 플레이어 정보 가져오기
-    socket.on("membersinfo", (info) => {
+    socket.on("membersInfo", (info) => {
       setPlayers(info);
     });
     socket.on("word", (word) => {
@@ -50,12 +58,18 @@ function Game({ socket }) {
     // 모두가 이야기를 했을 경우
     socket.on("voteTime", (value) => {
       setVoteTime(value);
+      if (value === true) {
+        setIsVote(false);
+      }
     });
     socket.on("voteResult", (value) => {
       setVoteResult(value);
     });
-    socket.on("voteResultTimer", (value) => {
-      setVoteResultTimer(value);
+    socket.on("timer", (value) => {
+      setTimer(value);
+    });
+    socket.on("isMafiaWin", () => {
+      setIsMafiaWin(true);
     });
 
     // 채팅 기능 구현
@@ -74,6 +88,15 @@ function Game({ socket }) {
       document.location.href = "/join";
     }
   }, [myInfo]);
+  useEffect(() => {
+    // 마피아를 선택했을 경우
+    socket.on("wordPage", () => {
+      history.replace("/word");
+    });
+    socket.on("gameEnd", () => {
+      history.replace("/lobby");
+    });
+  }, [socket, history]);
 
   // 함수 설정
   // chatting 전송
@@ -98,12 +121,14 @@ function Game({ socket }) {
   };
   // 투표 Socket
   const votePlayer = (number) => {
-    if (!isVote) {
-      socket.emit("vote", { number: number, index: myInfo.index });
-      setIsVote(true);
-      return true;
-    } else {
-      return false;
+    if (!players[myInfo.index].isDead) {
+      if (!isVote) {
+        socket.emit("vote", number);
+        setIsVote(true);
+        return true;
+      } else {
+        return false;
+      }
     }
   };
 
@@ -149,14 +174,19 @@ function Game({ socket }) {
           </div>
           <button>확인</button>
         </form>
-        {voteResult !== null && (
+        {voteResult === -1 ? (
+          <PassPopup count={timer} />
+        ) : voteResult !== null ? (
           <PlayerPopup
             img={players[voteResult].img}
             name={players[voteResult].name}
             isMafia={players[voteResult].isMafia}
-            count={voteResultTimer}
+            count={timer}
           />
+        ) : (
+          ""
         )}
+        {isMafiaWin && <EndingPopup isMafiaWin={isMafiaWin} count={timer} />}
       </section>
     </div>
   );

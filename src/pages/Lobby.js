@@ -27,7 +27,7 @@ function Lobby({ socket }) {
       setMyInfo(info);
     });
     // 모든 플레이어 정보 가져오기
-    socket.on("membersinfo", (info) => {
+    socket.on("membersInfo", (info) => {
       setPlayers(info);
     });
     // 채팅 기능 구현
@@ -40,7 +40,7 @@ function Lobby({ socket }) {
       chatBox.scrollTop = chatBox.scrollHeight;
     });
     // 게임 시작 카운트
-    socket.on("lobbyCount", (value) => {
+    socket.on("timer", (value) => {
       setCount(value);
     });
   }, [socket]);

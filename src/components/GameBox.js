@@ -11,7 +11,6 @@ function GameBox({
   isVoteTime,
   voteCount,
   votePlayer,
-  isTurn,
 }) {
   // 고정 변수
   const dir = process.env.PUBLIC_URL;
@@ -21,6 +20,9 @@ function GameBox({
 
   // 함수 설정
   const isVoteBtnClickHandler = () => {
+    if (isDead) {
+      return;
+    }
     if (votePlayer(index) === true) {
       setIsVote(true);
     }
@@ -34,8 +36,6 @@ function GameBox({
         </div>
         <h1>{name}</h1>
       </div>
-
-      {isTurn && <div className={style.turnEffect}></div>}
 
       {
         // 플레이어 참여
@@ -72,7 +72,7 @@ function GameBox({
 
       {
         // 투표 여부
-        isVote && <div className={style.isVote}></div>
+        isVote && !isDead && <div className={style.isVote}></div>
       }
     </div>
   );

@@ -16,8 +16,9 @@ let membersInfo = [];
 let mafiaNumber = null;
 let word = { category: "", word: "" };
 let isGamePlaying = false;
-let isTurn = 0;
+let turnRotation = 0;
 let voteCount = 0;
+let isTurn = 0;
 let data;
 
 // 데이터 준비
@@ -102,15 +103,39 @@ const getMyInfo = (socket) => {
 
   return info;
 };
-const gameStartCount = (num) => {
-  setTimeout(() => {
-    if (!num) {
-      sockets.emit("gameStart");
-    } else {
-      sockets.emit("lobbyCount", num);
-    }
-    console.log(`${getDate()} > Game is Start Count : ${num}`);
-  }, (3 - num) * 1000);
+const timer = (seconds) => {
+  for (let i = seconds; i > 0; i--) {
+    setTimeout(() => {
+      sockets.emit("timer", i);
+    }, (seconds - i) * 1000);
+  }
+};
+const turnReset = () => {
+  if (turnRotation === 1) {
+    voteCount = 1;
+  }
+
+  isTurn = 0;
+  if (membersInfo[0].isDead === true) {
+    isTurn = 1;
+  }
+
+  for (let i = 0; i < membersInfo.length; i++) {
+    membersInfo[i].commant = "";
+    membersInfo[i].voteCount = 0;
+  }
+};
+const membersInfoReset = () => {
+  for (let i = 0; i < membersInfo.length; i++) {
+    membersInfo[i].commant = "";
+    membersInfo[i].voteCount = 0;
+    membersInfo[i].isDead = false;
+    membersInfo[i].isReady = false;
+    membersInfo[i].isMafia = false;
+  }
+
+  turnRotation = 0;
+  isGamePlaying = false;
 };
 
 // 소켓 설정
@@ -119,6 +144,8 @@ sockets.on("connection", (socket) => {
   socket.on("join", ({ profileImg, profileName }) => {
     if (membersInfo.length === 0) {
       isGamePlaying = false;
+      isTurn = 0;
+      voteCount = 0;
     }
 
     if (membersInfo.length >= 8) {
@@ -155,13 +182,14 @@ sockets.on("connection", (socket) => {
 
   // 멤버 정보 요청
   socket.on("membersInfo", () => {
-    sockets.emit("membersinfo", getMembersInfo());
+    sockets.emit("membersInfo", getMembersInfo());
   });
   // 본인 정보 요청
   socket.on("myInfo", () => {
     socket.emit("myInfo", getMyInfo(socket));
   });
 
+  // 로비에서 사용할 Socket
   // 레디 할 경우
   socket.on("ready", (value) => {
     let name = "";
@@ -178,7 +206,7 @@ sockets.on("connection", (socket) => {
     console.log(`${getDate()} > [${name}] is ${ready ? "Ready" : "UnReady"}`);
 
     // 데이터 전달
-    sockets.emit("membersinfo", getMembersInfo());
+    sockets.emit("membersInfo", getMembersInfo());
     socket.emit("myInfo", getMyInfo(socket));
 
     // 모두 레디 하였는지 판단
@@ -196,6 +224,11 @@ sockets.on("connection", (socket) => {
 
     // 모두 레디 하였을 경우
     if (isAllReady) {
+      // 레디 해제
+      for (let i = 0; i < membersInfo.length; i++) {
+        membersInfo[i].isReady = false;
+      }
+
       // 마피아 지정
       mafiaNumber = Math.floor(Math.random() * membersInfo.length);
       membersInfo[mafiaNumber].isMafia = true;
@@ -210,9 +243,11 @@ sockets.on("connection", (socket) => {
       word.word = data[categoryIndex].단어[wordIndex];
 
       // 게임 시작 카운트 다운
-      for (let i = 3; i >= 0; i--) {
-        gameStartCount(i);
-      }
+      timer(3);
+      setTimeout(() => {
+        sockets.emit("gameStart");
+        console.log(`${getDate()} > Game is Started`);
+      }, 3000);
       isGamePlaying = true;
     }
   });
@@ -226,6 +261,7 @@ sockets.on("connection", (socket) => {
   socket.on("turn", () => {
     socket.emit("turn", isTurn);
   });
+  // 이야기 입력 시
   socket.on("commant", ({ index, commant }) => {
     membersInfo[index].commant = commant;
     isTurn++;
@@ -237,10 +273,11 @@ sockets.on("connection", (socket) => {
     }
 
     sockets.emit("turn", isTurn);
-    sockets.emit("membersinfo", getMembersInfo());
+    sockets.emit("membersInfo", getMembersInfo());
 
-    console.log(`${getDate()} > Game Commant is : ${commant}`);
-    console.log(`${getDate()} > Game Turn is : ${isTurn}`);
+    console.log(
+      `${getDate()} > [${membersInfo[index].name}] is Commant : ${commant}`
+    );
 
     if (isTurn >= membersInfo.length) {
       setTimeout(() => {
@@ -249,70 +286,97 @@ sockets.on("connection", (socket) => {
       }, 3000);
     }
   });
-  socket.on("vote", ({ number, index }) => {
-    if (index === 0) {
-      addVoteIndex = number;
-    }
+  // 투표할 경우
+  socket.on("vote", (number) => {
+    console.log(`${getDate()} > Member is Vote to ${membersInfo[number].name}`);
 
     membersInfo[number].voteCount++;
     voteCount++;
 
-    sockets.emit("membersinfo", getMembersInfo());
-    console.log(`${getDate()} > Member is Vote to ${membersInfo[number].name}`);
+    sockets.emit("membersInfo", getMembersInfo());
 
     // 투표가 종료될 경우
     if (voteCount >= membersInfo.length) {
+      console.log(`${getDate()} > Game is End Vote Time`);
+
       let max = 0;
       let maxMembers = [];
-
+      // 최다표 확인
       membersInfo.map((data) => {
         if (data.voteCount > max) {
           max = data.voteCount;
         }
       });
-
+      // 최대표를 받은 플레이어 확인
       membersInfo.map((data, index) => {
         if (data.voteCount === max) {
           maxMembers.push(index);
         }
       });
 
+      turnRotation++;
+
       // 동수표가 나왔을 경우
       if (maxMembers.length >= 2) {
-        isTurn = 0;
-        voteCount = 0;
+        sockets.emit("voteResult", -1);
 
-        for (let i = 0; i < membersInfo.length; i++) {
-          membersInfo[i].commant = "";
+        timer(3);
+
+        if (turnRotation >= 2) {
+          sockets.emit("isMafiaWin");
+
+          timer(3);
+          setTimeout(() => {
+            sockets.emit("gameEnd");
+          }, 3000);
+
+          membersInfoReset();
+          turnReset();
+          return;
         }
 
-        console.log(`${getDate()} > Game Commant is : ${commant}`);
-        console.log(`${getDate()} > Game Turn is : ${isTurn}`);
+        turnReset();
+        sockets.emit("turn", isTurn);
+        sockets.emit("membersInfo", getMembersInfo());
       }
       // 동수표가 나오지 않았을 경우
       else {
         sockets.emit("voteResult", maxMembers[0]);
 
-        for (let i = 3; i >= 0; i--) {
-          setTimeout(() => {
-            sockets.emit("voteResultTimer", i);
-          }, (3 - i) * 1000);
-        }
+        timer(3);
 
-        // 투표한 사람이 마피아가 맞다면
-        if (membersInfo[maxMembers[0]].isMafia == true) {
-          sockets.emit("voteResult", null);
-        }
-        // 투표한 사람이 마피아가 아니라면
-        else {
-          membersInfo[maxMembers[0]].isDead = true;
-          isTurn = 0;
-          voteCount = 0;
-
-          for (let i = 0; i < membersInfo.length; i++) {
-            membersInfo[i].commant = "";
+        setTimeout(() => {
+          // 투표한 사람이 마피아가 맞다면
+          if (membersInfo[maxMembers[0]].isMafia == true) {
+            sockets.emit("voteResult", null);
+            sockets.emit("wordPage");
           }
-        }
+          // 투표한 사람이 마피아가 아니라면
+          else {
+            sockets.emit("voteResult", null);
+            sockets.emit("voteTime", false);
+
+            if (turnRotation >= 2) {
+              sockets.emit("isMafiaWin");
+
+              timer(3);
+              setTimeout(() => {
+                sockets.emit("gameEnd");
+              }, 3000);
+
+              membersInfoReset();
+              turnReset();
+              return;
+            }
+
+            membersInfo[maxMembers[0]].isDead = true;
+            turnReset();
+            membersInfo[maxMembers[0]].voteCount = null;
+
+            sockets.emit("turn", isTurn);
+            sockets.emit("membersInfo", getMembersInfo());
+          }
+        }, 3000);
       }
     }
   });
