@@ -16,9 +16,9 @@ function Join({ socket }) {
   useEffect(() => {
     socket.emit("disconnection");
 
-    socket.on("isFull", (isFull) => {
-      if (isFull) {
-        alert("방이 이미 가득 찼어요");
+    socket.on("isJoin", (value) => {
+      if (!value.isJoin) {
+        alert(`${value.content}`);
       } else {
         history.replace("/lobby");
       }

@@ -1,5 +1,14 @@
 .contentBox > h1 {
+  position: relative;
+
   color: #550000;
+}
+.contentBox > h1 > span {
+  position: absolute;
+  right: 24px;
+
+  font-size: 18px;
+  color: #333333;
 }
 
 .gameBox {
@@ -15,6 +24,8 @@
 }
 
 #gameForm {
+  position: relative;
+  z-index: 5px;
   margin-top: 20px;
 
   width: 760px;
@@ -29,7 +40,7 @@
 
   display: flex;
 }
-#gameForm > div {
+#gameForm > div:nth-of-type(1) {
   width: 650px;
   height: 124px;
 }
@@ -76,4 +87,7 @@
   transform: translateY(4px);
 
   box-shadow: none;
+}
+.isTurn {
+  box-shadow: 0px 0px 10px rgba(81, 0, 0, 1);
 }

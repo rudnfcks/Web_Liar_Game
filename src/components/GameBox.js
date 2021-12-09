@@ -1,6 +1,8 @@
+import { useState } from "react";
 import style from "./css/GameBox.module.css";
 
 function GameBox({
+  index,
   img,
   name,
   word,
@@ -8,9 +10,21 @@ function GameBox({
   isDead,
   isVoteTime,
   voteCount,
+  votePlayer,
   isTurn,
 }) {
+  // 고정 변수
   const dir = process.env.PUBLIC_URL;
+
+  // State 설정
+  const [isVote, setIsVote] = useState(false);
+
+  // 함수 설정
+  const isVoteBtnClickHandler = () => {
+    if (votePlayer(index) === true) {
+      setIsVote(true);
+    }
+  };
 
   return (
     <div className={style.gameBox}>
@@ -50,7 +64,7 @@ function GameBox({
       {
         // 투표 시간
         isVoteTime && (
-          <button className={style.voteBox}>
+          <button className={style.voteBox} onClick={isVoteBtnClickHandler}>
             <h1>{voteCount !== null ? voteCount : ""}</h1>
           </button>
         )
@@ -58,7 +72,7 @@ function GameBox({
 
       {
         // 투표 여부
-        false && <div className={style.isVote}></div>
+        isVote && <div className={style.isVote}></div>
       }
     </div>
   );
