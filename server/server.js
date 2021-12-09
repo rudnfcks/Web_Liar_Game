@@ -230,6 +230,12 @@ sockets.on("connection", (socket) => {
     membersInfo[index].commant = commant;
     isTurn++;
 
+    if (isTurn < membersInfo.length) {
+      if (membersInfo[isTurn].isDead === true) {
+        isTurn++;
+      }
+    }
+
     sockets.emit("turn", isTurn);
     sockets.emit("membersinfo", getMembersInfo());
 
@@ -254,6 +260,7 @@ sockets.on("connection", (socket) => {
     sockets.emit("membersinfo", getMembersInfo());
     console.log(`${getDate()} > Member is Vote to ${membersInfo[number].name}`);
 
+    // 투표가 종료될 경우
     if (voteCount >= membersInfo.length) {
       let max = 0;
       let maxMembers = [];
@@ -270,6 +277,7 @@ sockets.on("connection", (socket) => {
         }
       });
 
+      // 동수표가 나왔을 경우
       if (maxMembers.length >= 2) {
         isTurn = 0;
         voteCount = 0;
@@ -280,26 +288,30 @@ sockets.on("connection", (socket) => {
 
         console.log(`${getDate()} > Game Commant is : ${commant}`);
         console.log(`${getDate()} > Game Turn is : ${isTurn}`);
-      } else {
+      }
+      // 동수표가 나오지 않았을 경우
+      else {
         sockets.emit("voteResult", maxMembers[0]);
 
         for (let i = 3; i >= 0; i--) {
           setTimeout(() => {
             sockets.emit("voteResultTimer", i);
-            if (membersInfo[maxMembers[0]].isMafia == true) {
-              sockets.emit("word");
-            } else {
-              isTurn = 0;
-              voteCount = 0;
-
-              for (let i = 0; i < membersInfo.length; i++) {
-                membersInfo[i].commant = "";
-              }
-
-              console.log(`${getDate()} > Game Commant is : ${commant}`);
-              console.log(`${getDate()} > Game Turn is : ${isTurn}`);
-            }
           }, (3 - i) * 1000);
+        }
+
+        // 투표한 사람이 마피아가 맞다면
+        if (membersInfo[maxMembers[0]].isMafia == true) {
+          sockets.emit("voteResult", null);
+        }
+        // 투표한 사람이 마피아가 아니라면
+        else {
+          membersInfo[maxMembers[0]].isDead = true;
+          isTurn = 0;
+          voteCount = 0;
+
+          for (let i = 0; i < membersInfo.length; i++) {
+            membersInfo[i].commant = "";
+          }
         }
       }
     }
