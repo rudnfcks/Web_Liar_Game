@@ -38,7 +38,6 @@ function Game({ socket }) {
     socket.emit("turn");
     socket.emit("word");
     socket.emit("membersInfo");
-    socket.emit("myInfo");
 
     // 내 정보 가져오기
     socket.on("myInfo", (info) => {
@@ -46,10 +45,11 @@ function Game({ socket }) {
     });
     // 모든 플레이어 정보 가져오기
     socket.on("membersInfo", (info) => {
+      socket.emit("myInfo");
       setPlayers(info);
     });
     socket.on("word", (word) => {
-      setWord(word);
+      setWord({ word: word.word, category: word.category.text });
     });
     // 턴 숫자 가져오기
     socket.on("turn", (number) => {

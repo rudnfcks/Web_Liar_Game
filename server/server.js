@@ -14,7 +14,10 @@ const sockets = io(server, {
 // 변수 설정
 let membersInfo = [];
 let mafiaNumber = null;
-let word = { category: "", word: "" };
+let word = {
+  category: { index: null, text: "" },
+  word: "",
+};
 let isGamePlaying = false;
 let turnRotation = 0;
 let voteCount = 0;
@@ -111,6 +114,7 @@ const timer = (seconds) => {
   }
 };
 const turnReset = () => {
+  voteCount = 0;
   if (turnRotation === 1) {
     voteCount = 1;
   }
@@ -239,14 +243,15 @@ sockets.on("connection", (socket) => {
         Math.random() * data[categoryIndex].카테고리.length
       );
 
-      word.category = data[categoryIndex].카테고리;
+      word.category.text = data[categoryIndex].카테고리;
+      word.category.index = categoryIndex;
       word.word = data[categoryIndex].단어[wordIndex];
 
       // 게임 시작 카운트 다운
       timer(3);
       setTimeout(() => {
         sockets.emit("gameStart");
-        console.log(`${getDate()} > Game is Started`);
+        console.log(`${getDate()} > Game is Started, Word : ${word.word}`);
       }, 3000);
       isGamePlaying = true;
     }
@@ -256,6 +261,11 @@ sockets.on("connection", (socket) => {
   // 게임 시작 후 단어 요청
   socket.on("word", () => {
     socket.emit("word", word);
+  });
+  socket.on("words", () => {
+    if (isGamePlaying) {
+      socket.emit("words", data[word.category.index].단어);
+    }
   });
   // 턴 숫자 요청
   socket.on("turn", () => {
@@ -379,6 +389,27 @@ sockets.on("connection", (socket) => {
         }, 3000);
       }
     }
+  });
+
+  socket.on("selectWord", (text) => {
+    setTimeout(() => {
+      console.log(`${getDate} > Selected word is ${text} : ${word.word}`);
+
+      if (text === word.word) {
+        console.log(`${getDate()} > Mafia is Win`);
+        sockets.emit("isMafiaWin", true);
+      } else {
+        console.log(`${getDate()} > Mafia is Win`);
+        sockets.emit("isMafiaWin", false);
+      }
+
+      timer(3);
+      setTimeout(() => {
+        membersInfoReset();
+        turnReset();
+        sockets.emit("gameEnd");
+      }, 3000);
+    }, 1000);
   });
 
   // Chatting 기능 구현

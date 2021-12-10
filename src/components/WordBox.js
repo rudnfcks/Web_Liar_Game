@@ -1,10 +1,19 @@
+import { useState } from "react/cjs/react.development";
 import style from "./css/WordBox.module.css";
 
-function WordBox({ word }) {
+function WordBox({ word, func }) {
+  const [isVote, setIsVote] = useState(false);
+
+  const btnClickHandler = () => {
+    if (func(word)) {
+      setIsVote(true);
+    }
+  };
+
   return (
-    <button className={style.wordBox}>
+    <button className={style.wordBox} onClick={btnClickHandler}>
       {word}
-      {false && <div className={style.over}></div>}
+      {isVote && <div className={style.over}></div>}
     </button>
   );
 }

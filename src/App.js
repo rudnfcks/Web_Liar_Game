@@ -13,7 +13,8 @@ import Word from "./pages/Word";
 
 import "./reset.css";
 
-const socket = io.connect("113.199.116.33:5000");
+//const socket = io.connect("113.199.116.33:5000");
+const socket = io.connect("192.168.0.69:5000");
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
           <Game socket={socket} />
         </Route>
         <Route path="/word">
-          <Word />
+          <Word socket={socket} />
         </Route>
         <Route path="/">
           <Redirect to="/join" />

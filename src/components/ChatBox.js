@@ -15,6 +15,12 @@ function ChatBox({ data, info, send }) {
   const chatBtnClickHandler = (event) => {
     event.preventDefault();
 
+    if (info.isDead) {
+      alert("죽은 사람은 채팅을 할 수 없습니다.");
+      setChatInput("");
+      return;
+    }
+
     if (!chatInput.replace(/[ 　ㅤ]/g, "")) {
       setChatInput("");
       return;
